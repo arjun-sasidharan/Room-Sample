@@ -27,6 +27,12 @@ class MainActivity : AppCompatActivity() {
         // since we are using live data with data binding, need to specify the lifecycle owner
         binding.lifecycleOwner = this
         initRecyclerView()
+
+        contactViewModel.message.observe(this) {
+            it.getContentIfNotHandled()?.let {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun initRecyclerView() {
@@ -47,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun listItemClicked(contact: Contact) {
-        Toast.makeText(this, contact.name, Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this, contact.name, Toast.LENGTH_SHORT).show()
         contactViewModel.initUpdateAndDelete(contact)
     }
 }

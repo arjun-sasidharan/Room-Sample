@@ -1,5 +1,6 @@
 package com.example.room_sample
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,11 @@ class ContactViewModel(private val repository: ContactRepository) : ViewModel() 
 
     val saveOrUpdateButtonText = MutableLiveData<String>()
     val clearAllOrDeleteButtonText = MutableLiveData<String>()
+
+    private val statusMessage = MutableLiveData<Event<String>>()
+
+    val message : LiveData<Event<String>>
+        get() = statusMessage
 
     init {
         saveOrUpdateButtonText.value = "Save"
@@ -60,6 +66,9 @@ class ContactViewModel(private val repository: ContactRepository) : ViewModel() 
 
     private fun insert(contact: Contact) = viewModelScope.launch(Dispatchers.IO) {
         repository.insert(contact)
+        withContext(Dispatchers.Main) {
+            statusMessage.value = Event("Contact saved successfully")
+        }
     }
 
     private fun update(contact: Contact) = viewModelScope.launch(Dispatchers.IO) {
@@ -70,6 +79,7 @@ class ContactViewModel(private val repository: ContactRepository) : ViewModel() 
             isUpdateOrDelete = false
             saveOrUpdateButtonText.value = "Save"
             clearAllOrDeleteButtonText.value = "Clear All"
+            statusMessage.value = Event("Contact updated successfully")
         }
     }
 
@@ -81,10 +91,14 @@ class ContactViewModel(private val repository: ContactRepository) : ViewModel() 
             isUpdateOrDelete = false
             saveOrUpdateButtonText.value = "Save"
             clearAllOrDeleteButtonText.value = "Clear All"
+            statusMessage.value = Event("Contact deleted successfully")
         }
     }
 
     private fun clearAll() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAll()
+        withContext(Dispatchers.Main) {
+            statusMessage.value = Event("All contact deleted successfully")
+        }
     }
 }
