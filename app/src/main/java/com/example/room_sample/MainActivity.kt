@@ -1,13 +1,14 @@
 package com.example.room_sample
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.example.room_sample.databinding.ActivityMainBinding
+import com.example.room_sample.db.Contact
 import com.example.room_sample.db.ContactDatabase
 import com.example.room_sample.db.ContactRepository
 
@@ -36,7 +37,17 @@ class MainActivity : AppCompatActivity() {
     private fun displayContactsList() {
         contactViewModel.contacts.observe(this) {
             Log.i("TAG", it.toString())
-            binding.contactRecyclerView.adapter = MyRecyclerViewAdapter(it)
+            binding.contactRecyclerView.adapter =
+                MyRecyclerViewAdapter(it) { selectedItem: Contact ->
+                    listItemClicked(
+                        selectedItem
+                    )
+                }
         }
+    }
+
+    private fun listItemClicked(contact: Contact) {
+        Toast.makeText(this, contact.name, Toast.LENGTH_SHORT).show()
+        contactViewModel.initUpdateAndDelete(contact)
     }
 }
