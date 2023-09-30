@@ -65,40 +65,57 @@ class ContactViewModel(private val repository: ContactRepository) : ViewModel() 
     }
 
     private fun insert(contact: Contact) = viewModelScope.launch(Dispatchers.IO) {
-        repository.insert(contact)
+        val newRawId = repository.insert(contact)
         withContext(Dispatchers.Main) {
-            statusMessage.value = Event("Contact saved successfully")
+            if (newRawId > -1) {
+            statusMessage.value = Event("Contact saved successfully, $newRawId")
+            } else {
+                statusMessage.value = Event("Error occurred")
+            }
         }
     }
 
     private fun update(contact: Contact) = viewModelScope.launch(Dispatchers.IO) {
-        repository.update(contact)
+        val noOfRows = repository.update(contact)
         withContext(Dispatchers.Main) {
-            inputName.value = ""
-            inputPhoneNo.value = ""
-            isUpdateOrDelete = false
-            saveOrUpdateButtonText.value = "Save"
-            clearAllOrDeleteButtonText.value = "Clear All"
-            statusMessage.value = Event("Contact updated successfully")
+            if (noOfRows > 0) {
+                inputName.value = ""
+                inputPhoneNo.value = ""
+                isUpdateOrDelete = false
+                saveOrUpdateButtonText.value = "Save"
+                clearAllOrDeleteButtonText.value = "Clear All"
+                statusMessage.value = Event("$noOfRows rows updated successfully")
+            } else {
+                statusMessage.value = Event("Error occurred")
+            }
+
         }
     }
 
     private fun delete(contact: Contact) = viewModelScope.launch(Dispatchers.IO) {
-        repository.delete(contact)
+        val noOfRowsDeleted = repository.delete(contact)
         withContext(Dispatchers.Main) {
-            inputName.value = ""
-            inputPhoneNo.value = ""
-            isUpdateOrDelete = false
-            saveOrUpdateButtonText.value = "Save"
-            clearAllOrDeleteButtonText.value = "Clear All"
-            statusMessage.value = Event("Contact deleted successfully")
+            if (noOfRowsDeleted > 0) {
+                inputName.value = ""
+                inputPhoneNo.value = ""
+                isUpdateOrDelete = false
+                saveOrUpdateButtonText.value = "Save"
+                clearAllOrDeleteButtonText.value = "Clear All"
+                statusMessage.value = Event("$noOfRowsDeleted rows deleted successfully")
+            } else {
+                statusMessage.value = Event("Error occurred")
+            }
         }
     }
 
     private fun clearAll() = viewModelScope.launch(Dispatchers.IO) {
-        repository.deleteAll()
+        val noOfRowsDeleted =  repository.deleteAll()
         withContext(Dispatchers.Main) {
-            statusMessage.value = Event("All contact deleted successfully")
+            if (noOfRowsDeleted > 0) {
+            statusMessage.value = Event("$noOfRowsDeleted rows deleted successfully")
+            } else {
+                statusMessage.value = Event("Error occurred")
+            }
         }
     }
 }

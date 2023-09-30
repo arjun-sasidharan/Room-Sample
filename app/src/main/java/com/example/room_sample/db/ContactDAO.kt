@@ -10,17 +10,20 @@ import androidx.room.Update
 @Dao
 interface ContactDAO {
 
+    // return row id
     @Insert
-    suspend fun insertContact(contact: Contact)
+    suspend fun insertContact(contact: Contact) : Long
 
+    // return no of rows updated
     @Update
-    suspend fun updateContact(contact: Contact)
+    suspend fun updateContact(contact: Contact): Int
 
+    // return no of rows deleted
     @Delete
-    suspend fun deleteContact(contact: Contact)
+    suspend fun deleteContact(contact: Contact) : Int
 
     @Query("DELETE FROM contact_data_table")
-    suspend fun deleteAll()
+    suspend fun deleteAll() : Int
 
     // since this method return LiveData, and Room library will automatically call this fun in
     // a background thread, we don't have to manually make it suspend fun and call it in a coroutine
