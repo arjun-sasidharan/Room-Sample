@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.example.room_sample.databinding.ActivityMainBinding
 import com.example.room_sample.db.ContactDatabase
 import com.example.room_sample.db.ContactRepository
@@ -23,12 +25,18 @@ class MainActivity : AppCompatActivity() {
         binding.myViewModel = contactViewModel
         // since we are using live data with data binding, need to specify the lifecycle owner
         binding.lifecycleOwner = this
+        initRecyclerView()
+    }
+
+    private fun initRecyclerView() {
+        binding.contactRecyclerView.layoutManager = LinearLayoutManager(this)
         displayContactsList()
     }
 
     private fun displayContactsList() {
         contactViewModel.contacts.observe(this) {
             Log.i("TAG", it.toString())
+            binding.contactRecyclerView.adapter = MyRecyclerViewAdapter(it)
         }
     }
 }
