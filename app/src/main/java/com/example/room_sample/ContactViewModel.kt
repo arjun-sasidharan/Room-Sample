@@ -1,5 +1,6 @@
 package com.example.room_sample
 
+import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,7 +26,7 @@ class ContactViewModel(private val repository: ContactRepository) : ViewModel() 
 
     private val statusMessage = MutableLiveData<Event<String>>()
 
-    val message : LiveData<Event<String>>
+    val message: LiveData<Event<String>>
         get() = statusMessage
 
     init {
@@ -34,16 +35,26 @@ class ContactViewModel(private val repository: ContactRepository) : ViewModel() 
     }
 
     fun saveOrUpdate() {
-        if (isUpdateOrDelete) {
-            contactToUpdateOrDelete.name = inputName.value!!
-            contactToUpdateOrDelete.phoneNo = inputPhoneNo.value!!
-            update(contactToUpdateOrDelete)
+        // validation
+        if (inputName.value == null || inputName.value!!.isEmpty()) {
+            statusMessage.value = Event("Please enter contact name")
+        }
+        else if (inputPhoneNo.value == null || inputPhoneNo.value!!.isEmpty()) {
+            statusMessage.value = Event("Please enter contact phone no")
+        } else if (!Patterns.PHONE.matcher(inputPhoneNo.value!!).matches()) {
+            statusMessage.value = Event("Please enter a valid phone no")
         } else {
-            val name = inputName.value!!
-            val phoneNo = inputPhoneNo.value!!
-            insert(Contact(0, name, phoneNo))
-            inputName.value = ""
-            inputPhoneNo.value = ""
+            if (isUpdateOrDelete) {
+                contactToUpdateOrDelete.name = inputName.value!!
+                contactToUpdateOrDelete.phoneNo = inputPhoneNo.value!!
+                update(contactToUpdateOrDelete)
+            } else {
+                val name = inputName.value!!
+                val phoneNo = inputPhoneNo.value!!
+                insert(Contact(0, name, phoneNo))
+                inputName.value = ""
+                inputPhoneNo.value = ""
+            }
         }
     }
 
@@ -68,7 +79,7 @@ class ContactViewModel(private val repository: ContactRepository) : ViewModel() 
         val newRawId = repository.insert(contact)
         withContext(Dispatchers.Main) {
             if (newRawId > -1) {
-            statusMessage.value = Event("Contact saved successfully, $newRawId")
+                statusMessage.value = Event("Contact saved successfully, $newRawId")
             } else {
                 statusMessage.value = Event("Error occurred")
             }
@@ -109,10 +120,10 @@ class ContactViewModel(private val repository: ContactRepository) : ViewModel() 
     }
 
     private fun clearAll() = viewModelScope.launch(Dispatchers.IO) {
-        val noOfRowsDeleted =  repository.deleteAll()
+        val noOfRowsDeleted = repository.deleteAll()
         withContext(Dispatchers.Main) {
             if (noOfRowsDeleted > 0) {
-            statusMessage.value = Event("$noOfRowsDeleted rows deleted successfully")
+                statusMessage.value = Event("$noOfRowsDeleted rows deleted successfully")
             } else {
                 statusMessage.value = Event("Error occurred")
             }
